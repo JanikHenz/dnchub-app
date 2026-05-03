@@ -101,7 +101,7 @@ def get_employee(
     current_user: CurrentUserDep,
 ) -> EmployeeResponse:
     """Get an employee by ID."""
-    employee = employee_service.get_or_404(db, employee_id)
+    employee = employee_service.get_or_404(db, employee_id, organization_id=current_user.organization_id)
     return EmployeeResponse.model_validate(employee)
 
 
@@ -113,7 +113,7 @@ def update_employee(
     current_user: FleetManagerDep,
 ) -> EmployeeResponse:
     """Update an employee."""
-    employee = employee_service.get_or_404(db, employee_id)
+    employee = employee_service.get_or_404(db, employee_id, organization_id=current_user.organization_id)
     updated = employee_service.update(db, db_obj=employee, obj_in=employee_in)
     return EmployeeResponse.model_validate(updated)
 
@@ -125,7 +125,7 @@ def delete_employee(
     current_user: FleetManagerDep,
 ) -> None:
     """Delete an employee."""
-    employee_service.delete(db, employee_id)
+    employee_service.delete(db, employee_id, organization_id=current_user.organization_id)
 
 
 @router.post("/{employee_id}/pin", response_model=EmployeeResponse)
@@ -136,7 +136,7 @@ def set_employee_pin(
     current_user: FleetManagerDep,
 ) -> EmployeeResponse:
     """Set employee PIN code for POS access."""
-    employee = employee_service.get_or_404(db, employee_id)
+    employee = employee_service.get_or_404(db, employee_id, organization_id=current_user.organization_id)
     updated = employee_service.set_pin(db, employee, pin_code)
     return EmployeeResponse.model_validate(updated)
 

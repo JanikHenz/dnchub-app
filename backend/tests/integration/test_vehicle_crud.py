@@ -123,15 +123,12 @@ class TestVehicleCRUDIntegration:
         )
         assert delete_res.status_code == 204
 
-        # GET by ID still returns 200 (soft-deleted records are not filtered in get_or_404)
         get_res = client.get(
             f"/api/v1/vehicles/{vehicle_id}",
             headers=admin_headers,
         )
-        assert get_res.status_code == 200
-        assert get_res.json()["deleted_at"] is not None
+        assert get_res.status_code == 404
 
-        # But list endpoint should filter it out
         list_res = client.get("/api/v1/vehicles", headers=admin_headers)
         assert list_res.status_code == 200
         vehicle_ids = [v["id"] for v in list_res.json()]

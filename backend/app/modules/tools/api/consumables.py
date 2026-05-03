@@ -25,7 +25,7 @@ def list_consumables(
 ) -> list[ConsumableResponse]:
     """List consumables in the organization."""
     if case_id:
-        items = consumable_service.get_by_case(db, case_id=case_id)
+        items = consumable_service.get_by_case(db, case_id=case_id, organization_id=current_user.organization_id)
     elif low_stock_only:
         items = consumable_service.get_low_stock(
             db, organization_id=current_user.organization_id
@@ -81,7 +81,7 @@ def get_consumable(
     current_user: CurrentUserDep,
 ) -> ConsumableResponse:
     """Get a consumable by ID."""
-    consumable = consumable_service.get_or_404(db, consumable_id)
+    consumable = consumable_service.get_or_404(db, consumable_id, organization_id=current_user.organization_id)
     return ConsumableResponse.model_validate(consumable)
 
 
@@ -93,7 +93,7 @@ def update_consumable(
     current_user: FleetManagerDep,
 ) -> ConsumableResponse:
     """Update a consumable."""
-    consumable = consumable_service.get_or_404(db, consumable_id)
+    consumable = consumable_service.get_or_404(db, consumable_id, organization_id=current_user.organization_id)
     updated = consumable_service.update(db, db_obj=consumable, obj_in=consumable_in)
     return ConsumableResponse.model_validate(updated)
 
@@ -106,7 +106,7 @@ def adjust_quantity(
     current_user: FleetManagerDep,
 ) -> ConsumableResponse:
     """Adjust consumable stock quantity. Use positive delta to add, negative to consume."""
-    consumable = consumable_service.get_or_404(db, consumable_id)
+    consumable = consumable_service.get_or_404(db, consumable_id, organization_id=current_user.organization_id)
     updated = consumable_service.adjust_quantity(
         db, consumable=consumable, delta=adjustment.delta
     )
@@ -120,4 +120,4 @@ def delete_consumable(
     current_user: FleetManagerDep,
 ) -> None:
     """Soft-delete a consumable."""
-    consumable_service.delete(db, consumable_id)
+    consumable_service.delete(db, consumable_id, organization_id=current_user.organization_id)

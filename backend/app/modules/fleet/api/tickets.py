@@ -139,7 +139,7 @@ def get_ticket(
     current_user: CurrentUserDep,
 ) -> TicketResponse:
     """Get a ticket by ID."""
-    ticket = ticket_service.get_or_404(db, ticket_id)
+    ticket = ticket_service.get_or_404(db, ticket_id, organization_id=current_user.organization_id)
     return TicketResponse.model_validate(ticket)
 
 
@@ -151,7 +151,7 @@ def update_ticket(
     current_user: FleetManagerDep,
 ) -> TicketResponse:
     """Update a ticket."""
-    ticket = ticket_service.get_or_404(db, ticket_id)
+    ticket = ticket_service.get_or_404(db, ticket_id, organization_id=current_user.organization_id)
     updated = ticket_service.update(db, db_obj=ticket, obj_in=ticket_in)
     return TicketResponse.model_validate(updated)
 
@@ -163,7 +163,7 @@ def delete_ticket(
     current_user: FleetManagerDep,
 ) -> None:
     """Delete a ticket (soft delete)."""
-    ticket_service.delete(db, ticket_id)
+    ticket_service.delete(db, ticket_id, organization_id=current_user.organization_id)
 
 
 @router.post("/{ticket_id}/pay", response_model=TicketResponse)
@@ -174,7 +174,7 @@ def pay_ticket(
     current_user: FleetManagerDep,
 ) -> TicketResponse:
     """Mark a ticket as paid with payment details."""
-    ticket = ticket_service.get_or_404(db, ticket_id)
+    ticket = ticket_service.get_or_404(db, ticket_id, organization_id=current_user.organization_id)
     updated = ticket_service.mark_as_paid(db, ticket, payment_in)
     return TicketResponse.model_validate(updated)
 
@@ -187,6 +187,6 @@ def update_ticket_status(
     current_user: FleetManagerDep,
 ) -> TicketResponse:
     """Update ticket status (e.g., to appealed or cancelled)."""
-    ticket = ticket_service.get_or_404(db, ticket_id)
+    ticket = ticket_service.get_or_404(db, ticket_id, organization_id=current_user.organization_id)
     updated = ticket_service.update_status(db, ticket, new_status)
     return TicketResponse.model_validate(updated)

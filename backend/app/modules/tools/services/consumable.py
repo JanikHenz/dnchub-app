@@ -35,12 +35,15 @@ class ConsumableService(BaseService[Consumable, ConsumableCreate, ConsumableUpda
         self,
         db: Session,
         case_id: str,
+        *,
+        organization_id: str | None = None,
     ) -> list[Consumable]:
         """List all consumables stored in a specific case."""
         result = db.execute(
             select(Consumable).where(
                 Consumable.case_id == case_id,
                 Consumable.deleted_at.is_(None),
+                Consumable.organization_id == organization_id
             )
         )
         return list(result.scalars().all())

@@ -98,7 +98,7 @@ def get_user(
     current_user: AdminUserDep,
 ) -> UserResponse:
     """Get a user by ID."""
-    user = user_service.get_or_404(db, user_id)
+    user = user_service.get_or_404(db, user_id, organization_id=current_user.organization_id)
     return UserResponse.model_validate(user)
 
 
@@ -110,7 +110,7 @@ def update_user(
     current_user: AdminUserDep,
 ) -> UserResponse:
     """Update a user (admin only)."""
-    user = user_service.get_or_404(db, user_id)
+    user = user_service.get_or_404(db, user_id, organization_id=current_user.organization_id)
     updated = user_service.update(db, db_obj=user, obj_in=user_in)
     return UserResponse.model_validate(updated)
 
@@ -122,7 +122,7 @@ def delete_user(
     current_user: AdminUserDep,
 ) -> None:
     """Delete a user (admin only)."""
-    user_service.delete(db, user_id)
+    user_service.delete(db, user_id, organization_id=current_user.organization_id)
 
 
 @router.post("/me/password", response_model=UserResponse)

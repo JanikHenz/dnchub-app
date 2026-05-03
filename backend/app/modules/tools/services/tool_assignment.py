@@ -35,12 +35,15 @@ class ToolAssignmentService(BaseService[ToolAssignment, ToolAssignmentCreate, To
         self,
         db: Session,
         employee_id: str,
+        *,
+        organization_id: str,
     ) -> list[ToolAssignment]:
         """Get active assignments for a specific employee."""
         result = db.execute(
             select(ToolAssignment).where(
                 ToolAssignment.assigned_to_employee_id == employee_id,
                 ToolAssignment.returned_at.is_(None),
+                ToolAssignment.organization_id == organization_id
             )
         )
         return list(result.scalars().all())
@@ -49,12 +52,15 @@ class ToolAssignmentService(BaseService[ToolAssignment, ToolAssignmentCreate, To
         self,
         db: Session,
         vehicle_id: str,
+        *,
+        organization_id: str,
     ) -> list[ToolAssignment]:
         """Get active assignments for a specific vehicle."""
         result = db.execute(
             select(ToolAssignment).where(
                 ToolAssignment.assigned_to_vehicle_id == vehicle_id,
                 ToolAssignment.returned_at.is_(None),
+                ToolAssignment.organization_id == organization_id
             )
         )
         return list(result.scalars().all())
@@ -65,9 +71,10 @@ class ToolAssignmentService(BaseService[ToolAssignment, ToolAssignmentCreate, To
         assignment_id: str,
         condition_at_return: ToolCondition | None = None,
         notes: str | None = None,
+        organization_id: str | None = None,
     ) -> ToolAssignment:
         """Mark an assignment as returned with optional condition and notes."""
-        assignment = self.get_or_404(db, assignment_id)
+        assignment = self.get_or_404(db, assignment_id, organization_id=organization_id)
         assignment.returned_at = datetime.now(timezone.utc)
         if condition_at_return is not None:
             assignment.condition_at_return = condition_at_return

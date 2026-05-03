@@ -30,4 +30,4 @@ def delete_attachment(
     current_user: SatManagerDep,
 ) -> None:
     """Delete a SAT attachment."""
-    sat_attachment_service.delete(db, attachment_id)
+    sat_attachment_service.delete(db, attachment_id, organization_id=current_user.organization_id)

@@ -30,6 +30,7 @@ class MaintenanceTaskService(
         db: Session,
         vehicle_id: str,
         *,
+        organization_id: str,
         skip: int = 0,
         limit: int = 100,
     ) -> list[MaintenanceTask]:
@@ -39,6 +40,7 @@ class MaintenanceTaskService(
             .where(
                 MaintenanceTask.vehicle_id == vehicle_id,
                 MaintenanceTask.deleted_at.is_(None),
+                MaintenanceTask.organization_id == organization_id
             )
             .order_by(MaintenanceTask.scheduled_date.desc())
             .offset(skip)
@@ -192,6 +194,8 @@ class MaintenanceScheduleService(
         self,
         db: Session,
         vehicle_id: str,
+        *,
+        organization_id: str,
     ) -> list[MaintenanceSchedule]:
         """Get maintenance schedules for a vehicle."""
         result = db.execute(
@@ -200,6 +204,7 @@ class MaintenanceScheduleService(
                 MaintenanceSchedule.vehicle_id == vehicle_id,
                 MaintenanceSchedule.is_active == True,
                 MaintenanceSchedule.deleted_at.is_(None),
+                MaintenanceSchedule.organization_id == organization_id
             )
         )
         return list(result.scalars().all())

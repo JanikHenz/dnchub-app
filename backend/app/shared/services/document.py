@@ -22,6 +22,7 @@ class DocumentService(BaseService[Document, DocumentCreate, DocumentUpdate]):
         db: Session,
         vehicle_id: str,
         *,
+        organization_id: str | None = None,
         skip: int = 0,
         limit: int = 100,
     ) -> list[Document]:
@@ -31,6 +32,7 @@ class DocumentService(BaseService[Document, DocumentCreate, DocumentUpdate]):
             .where(
                 Document.vehicle_id == vehicle_id,
                 Document.deleted_at.is_(None),
+                Document.organization_id == organization_id
             )
             .order_by(Document.expiry_date.asc().nullslast())
             .offset(skip)
@@ -43,6 +45,7 @@ class DocumentService(BaseService[Document, DocumentCreate, DocumentUpdate]):
         db: Session,
         employee_id: str,
         *,
+        organization_id: str | None = None,
         skip: int = 0,
         limit: int = 100,
     ) -> list[Document]:
@@ -52,6 +55,7 @@ class DocumentService(BaseService[Document, DocumentCreate, DocumentUpdate]):
             .where(
                 Document.employee_id == employee_id,
                 Document.deleted_at.is_(None),
+                Document.organization_id == organization_id
             )
             .order_by(Document.expiry_date.asc().nullslast())
             .offset(skip)

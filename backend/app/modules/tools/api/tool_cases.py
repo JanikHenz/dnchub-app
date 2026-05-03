@@ -55,7 +55,7 @@ def get_tool_case(
     current_user: CurrentUserDep,
 ) -> ToolCaseResponse:
     """Get a tool case by ID."""
-    case = tool_case_service.get_or_404(db, case_id)
+    case = tool_case_service.get_or_404(db, case_id, organization_id=current_user.organization_id)
     return ToolCaseResponse.model_validate(case)
 
 
@@ -67,7 +67,7 @@ def update_tool_case(
     current_user: FleetManagerDep,
 ) -> ToolCaseResponse:
     """Update a tool case."""
-    case = tool_case_service.get_or_404(db, case_id)
+    case = tool_case_service.get_or_404(db, case_id, organization_id=current_user.organization_id)
     updated = tool_case_service.update(db, db_obj=case, obj_in=case_in)
     return ToolCaseResponse.model_validate(updated)
 
@@ -79,7 +79,7 @@ def delete_tool_case(
     current_user: FleetManagerDep,
 ) -> None:
     """Delete a tool case (soft delete)."""
-    tool_case_service.delete(db, case_id)
+    tool_case_service.delete(db, case_id, organization_id=current_user.organization_id)
 
 
 @router.post("/{case_id}/convert-to-tool", response_model=ToolResponse, status_code=201)
@@ -89,7 +89,7 @@ def convert_case_to_tool(
     current_user: FleetManagerDep,
 ) -> ToolResponse:
     """Convert a case record to a tool record. Soft-deletes the case."""
-    case = tool_case_service.get_or_404(db, case_id)
+    case = tool_case_service.get_or_404(db, case_id, organization_id=current_user.organization_id)
 
     existing = (
         db.query(Tool)
@@ -132,6 +132,6 @@ def list_tools_in_case(
 ) -> list[ToolResponse]:
     """List all tools assigned to a specific case."""
     # Verify the case exists
-    tool_case_service.get_or_404(db, case_id)
-    tools = tool_service.get_by_case(db, case_id=case_id)
+    tool_case_service.get_or_404(db, case_id, organization_id=current_user.organization_id)
+    tools = tool_service.get_by_case(db, case_id=case_id, organization_id=current_user.organization_id)
     return [ToolResponse.model_validate(t) for t in tools]

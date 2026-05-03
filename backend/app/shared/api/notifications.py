@@ -1,6 +1,6 @@
 """Notification endpoints."""
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 
 from app.shared.api.deps import CurrentUserDep, DBDep
 from app.models.enums import NotificationType
@@ -73,6 +73,8 @@ def get_notification(
 ) -> NotificationResponse:
     """Get a notification by ID."""
     notification = notification_service.get_or_404(db, notification_id)
+    if notification.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail=f"Notification with id '{notification_id}' not found")
     return NotificationResponse.model_validate(notification)
 
 
@@ -84,6 +86,8 @@ def mark_notification_as_read(
 ) -> NotificationResponse:
     """Mark a notification as read."""
     notification = notification_service.get_or_404(db, notification_id)
+    if notification.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail=f"Notification with id '{notification_id}' not found")
     updated = notification_service.mark_as_read(db, notification)
     return NotificationResponse.model_validate(updated)
 
@@ -107,6 +111,9 @@ def delete_notification(
     current_user: CurrentUserDep,
 ) -> None:
     """Delete a notification."""
+    notification = notification_service.get_or_404(db, notification_id)
+    if notification.user_id != current_user.id:
+        raise HTTPException(status_code=404, detail=f"Notification with id '{notification_id}' not found")
     notification_service.delete(db, notification_id)
 
 

@@ -27,11 +27,11 @@ def list_documents(
     """List documents with optional filters."""
     if vehicle_id:
         documents = document_service.get_documents_by_vehicle(
-            db, vehicle_id, skip=skip, limit=limit
+            db, vehicle_id, organization_id=current_user.organization_id, skip=skip, limit=limit
         )
     elif employee_id:
         documents = document_service.get_documents_by_employee(
-            db, employee_id, skip=skip, limit=limit
+            db, employee_id, organization_id=current_user.organization_id, skip=skip, limit=limit
         )
     elif document_type:
         documents = document_service.get_documents_by_type(
@@ -120,7 +120,7 @@ def get_document(
     current_user: CurrentUserDep,
 ) -> DocumentResponse:
     """Get a document by ID."""
-    document = document_service.get_or_404(db, document_id)
+    document = document_service.get_or_404(db, document_id, organization_id=current_user.organization_id)
     return DocumentResponse.model_validate(document)
 
 
@@ -132,7 +132,7 @@ def update_document(
     current_user: FleetManagerDep,
 ) -> DocumentResponse:
     """Update a document."""
-    document = document_service.get_or_404(db, document_id)
+    document = document_service.get_or_404(db, document_id, organization_id=current_user.organization_id)
     updated = document_service.update(db, db_obj=document, obj_in=document_in)
     return DocumentResponse.model_validate(updated)
 
@@ -144,7 +144,7 @@ def delete_document(
     current_user: FleetManagerDep,
 ) -> None:
     """Delete a document."""
-    document_service.delete(db, document_id)
+    document_service.delete(db, document_id, organization_id=current_user.organization_id)
 
 
 @router.post("/{document_id}/verify", response_model=DocumentResponse)
@@ -154,7 +154,7 @@ def verify_document(
     current_user: FleetManagerDep,
 ) -> DocumentResponse:
     """Verify a document."""
-    document = document_service.get_or_404(db, document_id)
+    document = document_service.get_or_404(db, document_id, organization_id=current_user.organization_id)
     updated = document_service.verify_document(
         db, document, verified_by=current_user.id
     )
@@ -169,7 +169,7 @@ def reject_document(
     current_user: FleetManagerDep,
 ) -> DocumentResponse:
     """Reject a document."""
-    document = document_service.get_or_404(db, document_id)
+    document = document_service.get_or_404(db, document_id, organization_id=current_user.organization_id)
     updated = document_service.reject_document(
         db, document, rejection_reason=reason
     )

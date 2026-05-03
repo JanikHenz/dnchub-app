@@ -33,7 +33,7 @@ def list_maintenance_tasks(
     """List maintenance tasks with optional filters."""
     if vehicle_id:
         tasks = maintenance_task_service.get_tasks_by_vehicle(
-            db, vehicle_id, skip=skip, limit=limit
+            db, vehicle_id, organization_id=current_user.organization_id, skip=skip, limit=limit
         )
     elif status:
         tasks = maintenance_task_service.get_tasks_by_status(
@@ -115,7 +115,7 @@ def get_maintenance_task(
     current_user: CurrentUserDep,
 ) -> MaintenanceTaskResponse:
     """Get a maintenance task by ID."""
-    task = maintenance_task_service.get_or_404(db, task_id)
+    task = maintenance_task_service.get_or_404(db, task_id, organization_id=current_user.organization_id)
     return MaintenanceTaskResponse.model_validate(task)
 
 
@@ -127,7 +127,7 @@ def update_maintenance_task(
     current_user: FleetManagerDep,
 ) -> MaintenanceTaskResponse:
     """Update a maintenance task."""
-    task = maintenance_task_service.get_or_404(db, task_id)
+    task = maintenance_task_service.get_or_404(db, task_id, organization_id=current_user.organization_id)
     updated = maintenance_task_service.update(db, db_obj=task, obj_in=task_in)
     return MaintenanceTaskResponse.model_validate(updated)
 
@@ -141,7 +141,7 @@ def complete_maintenance_task(
     notes: str | None = None,
 ) -> MaintenanceTaskResponse:
     """Mark a maintenance task as completed."""
-    task = maintenance_task_service.get_or_404(db, task_id)
+    task = maintenance_task_service.get_or_404(db, task_id, organization_id=current_user.organization_id)
     updated = maintenance_task_service.complete_task(
         db, task, actual_cost=actual_cost, notes=notes
     )
@@ -156,7 +156,7 @@ def cancel_maintenance_task(
     reason: str | None = None,
 ) -> MaintenanceTaskResponse:
     """Cancel a maintenance task."""
-    task = maintenance_task_service.get_or_404(db, task_id)
+    task = maintenance_task_service.get_or_404(db, task_id, organization_id=current_user.organization_id)
     updated = maintenance_task_service.cancel_task(db, task, reason=reason)
     return MaintenanceTaskResponse.model_validate(updated)
 
@@ -168,7 +168,7 @@ def delete_maintenance_task(
     current_user: FleetManagerDep,
 ) -> None:
     """Delete a maintenance task."""
-    maintenance_task_service.delete(db, task_id)
+    maintenance_task_service.delete(db, task_id, organization_id=current_user.organization_id)
 
 
 # Maintenance Schedule endpoints
@@ -183,7 +183,7 @@ def list_maintenance_schedules(
     """List maintenance schedules."""
     if vehicle_id:
         schedules = maintenance_schedule_service.get_schedules_by_vehicle(
-            db, vehicle_id
+            db, vehicle_id, organization_id=current_user.organization_id
         )
     else:
         schedules = maintenance_schedule_service.get_multi(
@@ -234,7 +234,7 @@ def get_maintenance_schedule(
     current_user: CurrentUserDep,
 ) -> MaintenanceScheduleResponse:
     """Get a maintenance schedule by ID."""
-    schedule = maintenance_schedule_service.get_or_404(db, schedule_id)
+    schedule = maintenance_schedule_service.get_or_404(db, schedule_id, organization_id=current_user.organization_id)
     return MaintenanceScheduleResponse.model_validate(schedule)
 
 
@@ -246,7 +246,7 @@ def update_maintenance_schedule(
     current_user: FleetManagerDep,
 ) -> MaintenanceScheduleResponse:
     """Update a maintenance schedule."""
-    schedule = maintenance_schedule_service.get_or_404(db, schedule_id)
+    schedule = maintenance_schedule_service.get_or_404(db, schedule_id, organization_id=current_user.organization_id)
     updated = maintenance_schedule_service.update(
         db, db_obj=schedule, obj_in=schedule_in
     )
@@ -261,7 +261,7 @@ def create_task_from_schedule(
     scheduled_date: date | None = None,
 ) -> MaintenanceTaskResponse:
     """Create a maintenance task from a schedule."""
-    schedule = maintenance_schedule_service.get_or_404(db, schedule_id)
+    schedule = maintenance_schedule_service.get_or_404(db, schedule_id, organization_id=current_user.organization_id)
     task = maintenance_schedule_service.create_task_from_schedule(
         db, schedule, scheduled_date=scheduled_date
     )
@@ -275,4 +275,4 @@ def delete_maintenance_schedule(
     current_user: FleetManagerDep,
 ) -> None:
     """Delete a maintenance schedule."""
-    maintenance_schedule_service.delete(db, schedule_id)
+    maintenance_schedule_service.delete(db, schedule_id, organization_id=current_user.organization_id)

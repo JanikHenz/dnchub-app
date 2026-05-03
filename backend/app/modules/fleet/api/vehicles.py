@@ -74,7 +74,7 @@ def get_vehicle(
     current_user: CurrentUserDep,
 ) -> VehicleResponse:
     """Get a vehicle by ID."""
-    vehicle = vehicle_service.get_or_404(db, vehicle_id)
+    vehicle = vehicle_service.get_or_404(db, vehicle_id, organization_id=current_user.organization_id)
     return VehicleResponse.model_validate(vehicle)
 
 
@@ -86,7 +86,7 @@ def update_vehicle(
     current_user: FleetManagerDep,
 ) -> VehicleResponse:
     """Update a vehicle."""
-    vehicle = vehicle_service.get_or_404(db, vehicle_id)
+    vehicle = vehicle_service.get_or_404(db, vehicle_id, organization_id=current_user.organization_id)
     updated = vehicle_service.update(db, db_obj=vehicle, obj_in=vehicle_in)
     return VehicleResponse.model_validate(updated)
 
@@ -98,7 +98,7 @@ def delete_vehicle(
     current_user: FleetManagerDep,
 ) -> None:
     """Delete a vehicle."""
-    vehicle_service.delete(db, vehicle_id)
+    vehicle_service.delete(db, vehicle_id, organization_id=current_user.organization_id)
 
 
 @router.post("/{vehicle_id}/odometer", response_model=VehicleResponse)
@@ -109,7 +109,7 @@ def update_odometer(
     current_user: CurrentUserDep,
 ) -> VehicleResponse:
     """Update vehicle odometer reading."""
-    vehicle = vehicle_service.get_or_404(db, vehicle_id)
+    vehicle = vehicle_service.get_or_404(db, vehicle_id, organization_id=current_user.organization_id)
     updated = vehicle_service.update_odometer(db, vehicle, new_odometer)
     return VehicleResponse.model_validate(updated)
 
@@ -151,7 +151,7 @@ def get_vehicle_group(
     current_user: CurrentUserDep,
 ) -> VehicleGroupResponse:
     """Get a vehicle group by ID."""
-    group = vehicle_group_service.get_or_404(db, group_id)
+    group = vehicle_group_service.get_or_404(db, group_id, organization_id=current_user.organization_id)
     return VehicleGroupResponse.model_validate(group)
 
 
@@ -163,7 +163,7 @@ def update_vehicle_group(
     current_user: FleetManagerDep,
 ) -> VehicleGroupResponse:
     """Update a vehicle group."""
-    group = vehicle_group_service.get_or_404(db, group_id)
+    group = vehicle_group_service.get_or_404(db, group_id, organization_id=current_user.organization_id)
     updated = vehicle_group_service.update(db, db_obj=group, obj_in=group_in)
     return VehicleGroupResponse.model_validate(updated)
 
@@ -175,7 +175,7 @@ def delete_vehicle_group(
     current_user: FleetManagerDep,
 ) -> None:
     """Delete a vehicle group."""
-    vehicle_group_service.delete(db, group_id)
+    vehicle_group_service.delete(db, group_id, organization_id=current_user.organization_id)
 
 
 @router.post("/groups/{group_id}/vehicles/{vehicle_id}", status_code=201)

@@ -34,12 +34,15 @@ class ToolService(BaseService[Tool, ToolCreate, ToolUpdate]):
         self,
         db: Session,
         case_id: str,
+        *,
+        organization_id: str,
     ) -> list[Tool]:
         """List all tools assigned to a specific case."""
         result = db.execute(
             select(Tool).where(
                 Tool.case_id == case_id,
                 Tool.deleted_at.is_(None),
+                Tool.organization_id == organization_id
             )
         )
         return list(result.scalars().all())

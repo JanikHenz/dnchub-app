@@ -67,7 +67,7 @@ def get_assignment(
     current_user: CurrentUserDep,
 ) -> ToolAssignmentResponse:
     """Get a tool assignment by ID."""
-    assignment = tool_assignment_service.get_or_404(db, assignment_id)
+    assignment = tool_assignment_service.get_or_404(db, assignment_id, organization_id=current_user.organization_id)
     return ToolAssignmentResponse.model_validate(assignment)
 
 
@@ -88,6 +88,7 @@ def return_tool(
         assignment_id=assignment_id,
         condition_at_return=return_in.condition_at_return,
         notes=return_in.notes,
+        organization_id=current_user.organization_id,
     )
 
     # Update tool status back to AVAILABLE
@@ -112,7 +113,7 @@ def list_assignments_by_employee(
     current_user: CurrentUserDep,
 ) -> list[ToolAssignmentResponse]:
     """List active tool assignments for a specific employee."""
-    assignments = tool_assignment_service.get_by_employee(db, employee_id=employee_id)
+    assignments = tool_assignment_service.get_by_employee(db, employee_id=employee_id, organization_id=current_user.organization_id)
     return [ToolAssignmentResponse.model_validate(a) for a in assignments]
 
 
@@ -123,5 +124,5 @@ def list_assignments_by_vehicle(
     current_user: CurrentUserDep,
 ) -> list[ToolAssignmentResponse]:
     """List active tool assignments for a specific vehicle."""
-    assignments = tool_assignment_service.get_by_vehicle(db, vehicle_id=vehicle_id)
+    assignments = tool_assignment_service.get_by_vehicle(db, vehicle_id=vehicle_id, organization_id=current_user.organization_id)
     return [ToolAssignmentResponse.model_validate(a) for a in assignments]

@@ -30,11 +30,11 @@ def list_fuel_entries(
     """List fuel entries with optional filters."""
     if vehicle_id:
         entries = fuel_service.get_entries_by_vehicle(
-            db, vehicle_id, skip=skip, limit=limit
+            db, vehicle_id, organization_id=current_user.organization_id, skip=skip, limit=limit
         )
     elif employee_id:
         entries = fuel_service.get_entries_by_employee(
-            db, employee_id, skip=skip, limit=limit
+            db, employee_id, organization_id=current_user.organization_id, skip=skip, limit=limit
         )
     elif start_date and end_date:
         entries = fuel_service.get_entries_by_date_range(
@@ -120,7 +120,7 @@ def get_fuel_entry(
     current_user: CurrentUserDep,
 ) -> FuelEntryResponse:
     """Get a fuel entry by ID."""
-    entry = fuel_service.get_or_404(db, entry_id)
+    entry = fuel_service.get_or_404(db, entry_id, organization_id=current_user.organization_id)
     return FuelEntryResponse.model_validate(entry)
 
 
@@ -132,7 +132,7 @@ def update_fuel_entry(
     current_user: CurrentUserDep,
 ) -> FuelEntryResponse:
     """Update a fuel entry."""
-    entry = fuel_service.get_or_404(db, entry_id)
+    entry = fuel_service.get_or_404(db, entry_id, organization_id=current_user.organization_id)
     updated = fuel_service.update(db, db_obj=entry, obj_in=entry_in)
     return FuelEntryResponse.model_validate(updated)
 
@@ -144,4 +144,4 @@ def delete_fuel_entry(
     current_user: CurrentUserDep,
 ) -> None:
     """Delete a fuel entry."""
-    fuel_service.delete(db, entry_id)
+    fuel_service.delete(db, entry_id, organization_id=current_user.organization_id)

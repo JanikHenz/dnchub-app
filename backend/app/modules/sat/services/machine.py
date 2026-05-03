@@ -19,12 +19,15 @@ class SatMachineService(BaseService[SatMachine, SatMachineCreate, SatMachineUpda
         self,
         db: Session,
         customer_id: str,
+        *,
+        organization_id: str,
     ) -> list[SatMachine]:
         """Get all machines for a customer, excluding deleted."""
         result = db.execute(
             select(SatMachine).where(
                 SatMachine.customer_id == customer_id,
                 SatMachine.deleted_at.is_(None),
+                SatMachine.organization_id == organization_id
             )
         )
         return list(result.scalars().all())

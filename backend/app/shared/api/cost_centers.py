@@ -62,7 +62,7 @@ def get_cost_center(
     current_user: CurrentUserDep,
 ) -> CostCenterResponse:
     """Get a cost center by ID."""
-    cost_center = cost_center_service.get_or_404(db, cost_center_id)
+    cost_center = cost_center_service.get_or_404(db, cost_center_id, organization_id=current_user.organization_id)
     return CostCenterResponse.model_validate(cost_center)
 
 
@@ -74,7 +74,7 @@ def update_cost_center(
     current_user: FleetManagerDep,
 ) -> CostCenterResponse:
     """Update a cost center."""
-    cost_center = cost_center_service.get_or_404(db, cost_center_id)
+    cost_center = cost_center_service.get_or_404(db, cost_center_id, organization_id=current_user.organization_id)
     updated = cost_center_service.update(
         db, db_obj=cost_center, obj_in=cost_center_in
     )
@@ -88,7 +88,7 @@ def delete_cost_center(
     current_user: FleetManagerDep,
 ) -> None:
     """Delete a cost center."""
-    cost_center_service.delete(db, cost_center_id)
+    cost_center_service.delete(db, cost_center_id, organization_id=current_user.organization_id)
 
 
 @router.get("/{cost_center_id}/summary")
@@ -117,7 +117,7 @@ def get_budget_status(
     end_date: date = Query(...),
 ) -> dict:
     """Get budget status for a cost center."""
-    cost_center = cost_center_service.get_or_404(db, cost_center_id)
+    cost_center = cost_center_service.get_or_404(db, cost_center_id, organization_id=current_user.organization_id)
     return cost_center_service.check_budget(
         db,
         cost_center=cost_center,
@@ -203,7 +203,7 @@ def get_cost_allocation(
     current_user: CurrentUserDep,
 ) -> CostAllocationResponse:
     """Get a cost allocation by ID."""
-    allocation = cost_allocation_service.get_or_404(db, allocation_id)
+    allocation = cost_allocation_service.get_or_404(db, allocation_id, organization_id=current_user.organization_id)
     return CostAllocationResponse.model_validate(allocation)
 
 
@@ -215,7 +215,7 @@ def update_cost_allocation(
     current_user: FleetManagerDep,
 ) -> CostAllocationResponse:
     """Update a cost allocation."""
-    allocation = cost_allocation_service.get_or_404(db, allocation_id)
+    allocation = cost_allocation_service.get_or_404(db, allocation_id, organization_id=current_user.organization_id)
     updated = cost_allocation_service.update(
         db, db_obj=allocation, obj_in=allocation_in
     )
@@ -229,4 +229,4 @@ def delete_cost_allocation(
     current_user: FleetManagerDep,
 ) -> None:
     """Delete a cost allocation."""
-    cost_allocation_service.delete(db, allocation_id)
+    cost_allocation_service.delete(db, allocation_id, organization_id=current_user.organization_id)

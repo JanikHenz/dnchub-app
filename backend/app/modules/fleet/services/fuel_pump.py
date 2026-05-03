@@ -87,9 +87,10 @@ class FuelPumpService(BaseService[FuelPump, FuelPumpCreate, FuelPumpUpdate]):
         pump_id: str,
         volume: Decimal,
         new_odometer: Decimal | None = None,
+        organization_id: str | None = None,
     ) -> FuelPump:
         """Reduce pump level after fuel dispensing."""
-        pump = self.get_or_404(db, pump_id)
+        pump = self.get_or_404(db, pump_id, organization_id=organization_id)
 
         # Reduce the level
         pump.current_level = max(Decimal("0"), pump.current_level - volume)
@@ -109,9 +110,10 @@ class FuelPumpService(BaseService[FuelPump, FuelPumpCreate, FuelPumpUpdate]):
         pump_id: str,
         volume: Decimal,
         new_odometer: Decimal | None = None,
+        organization_id: str | None = None,
     ) -> FuelPump:
         """Increase pump level after fuel delivery."""
-        pump = self.get_or_404(db, pump_id)
+        pump = self.get_or_404(db, pump_id, organization_id=organization_id)
 
         # Increase the level (cap at capacity)
         new_level = pump.current_level + volume
@@ -131,9 +133,10 @@ class FuelPumpService(BaseService[FuelPump, FuelPumpCreate, FuelPumpUpdate]):
         db: Session,
         pump_id: str,
         adjustment: Decimal,
+        organization_id: str | None = None,
     ) -> FuelPump:
         """Manually adjust pump level (positive to add, negative to remove)."""
-        pump = self.get_or_404(db, pump_id)
+        pump = self.get_or_404(db, pump_id, organization_id=organization_id)
 
         new_level = pump.current_level + adjustment
         # Ensure level stays within bounds
@@ -149,9 +152,10 @@ class FuelPumpService(BaseService[FuelPump, FuelPumpCreate, FuelPumpUpdate]):
         db: Session,
         pump_id: str,
         maintenance_date: date,
+        organization_id: str | None = None,
     ) -> FuelPump:
         """Update maintenance date and calculate next maintenance."""
-        pump = self.get_or_404(db, pump_id)
+        pump = self.get_or_404(db, pump_id, organization_id=organization_id)
 
         pump.last_maintenance_date = maintenance_date
 

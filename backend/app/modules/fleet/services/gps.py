@@ -31,12 +31,15 @@ class TripService(BaseService[Trip, TripCreate, TripUpdate]):
         self,
         db: Session,
         vehicle_id: str,
+        *,
+        organization_id: str,
     ) -> Trip | None:
         """Get the current active trip for a vehicle."""
         result = db.execute(
             select(Trip).where(
                 Trip.vehicle_id == vehicle_id,
                 Trip.end_time.is_(None),  # Active trip has no end_time
+                Trip.organization_id == organization_id
             )
         )
         return result.scalar_one_or_none()
@@ -97,13 +100,14 @@ class TripService(BaseService[Trip, TripCreate, TripUpdate]):
         db: Session,
         vehicle_id: str,
         *,
+        organization_id: str,
         skip: int = 0,
         limit: int = 100,
     ) -> list[Trip]:
         """Get trips for a vehicle."""
         result = db.execute(
             select(Trip)
-            .where(Trip.vehicle_id == vehicle_id)
+            .where(Trip.vehicle_id == vehicle_id, Trip.organization_id == organization_id)
             .order_by(Trip.start_time.desc())
             .offset(skip)
             .limit(limit)
@@ -115,13 +119,14 @@ class TripService(BaseService[Trip, TripCreate, TripUpdate]):
         db: Session,
         employee_id: str,
         *,
+        organization_id: str,
         skip: int = 0,
         limit: int = 100,
     ) -> list[Trip]:
         """Get trips for an employee."""
         result = db.execute(
             select(Trip)
-            .where(Trip.employee_id == employee_id)
+            .where(Trip.employee_id == employee_id, Trip.organization_id == organization_id)
             .order_by(Trip.start_time.desc())
             .offset(skip)
             .limit(limit)
@@ -209,12 +214,14 @@ class TripPositionService(BaseService[TripPosition, TripPositionCreate, TripPosi
         self,
         db: Session,
         vehicle_id: str,
+        *,
+        organization_id: str,
     ) -> TripPosition | None:
         """Get the latest GPS position for a vehicle."""
         result = db.execute(
             select(TripPosition)
             .join(Trip)
-            .where(Trip.vehicle_id == vehicle_id)
+            .where(Trip.vehicle_id == vehicle_id, Trip.organization_id == organization_id)
             .order_by(TripPosition.recorded_at.desc())
             .limit(1)
         )

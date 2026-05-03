@@ -51,7 +51,7 @@ def get_tool_calibration(
     current_user: CurrentUserDep,
 ) -> ToolCalibrationResponse:
     """Get a tool calibration record by ID."""
-    calibration = tool_calibration_service.get_or_404(db, calibration_id)
+    calibration = tool_calibration_service.get_or_404(db, calibration_id, organization_id=current_user.organization_id)
     return ToolCalibrationResponse.model_validate(calibration)
 
 
@@ -63,7 +63,7 @@ def update_tool_calibration(
     current_user: FleetManagerDep,
 ) -> ToolCalibrationResponse:
     """Update a tool calibration record."""
-    calibration = tool_calibration_service.get_or_404(db, calibration_id)
+    calibration = tool_calibration_service.get_or_404(db, calibration_id, organization_id=current_user.organization_id)
     updated = tool_calibration_service.update(
         db, db_obj=calibration, obj_in=calibration_in
     )

@@ -29,7 +29,7 @@ class FuelPumpDeliveryService(
         from app.modules.fleet.services.fuel_pump import fuel_pump_service
 
         # Get pump to update level
-        pump = fuel_pump_service.get_or_404(db, obj_in.pump_id)
+        pump = fuel_pump_service.get_or_404(db, obj_in.pump_id, organization_id=obj_in.organization_id)
 
         # Calculate total cost
         total_cost = obj_in.volume * obj_in.price_per_unit
@@ -62,6 +62,7 @@ class FuelPumpDeliveryService(
             obj_in.pump_id,
             obj_in.volume,
             obj_in.pump_odometer_after,
+            organization_id=obj_in.organization_id,
         )
 
         db.flush()
@@ -73,6 +74,7 @@ class FuelPumpDeliveryService(
         db: Session,
         pump_id: str,
         *,
+        organization_id: str,
         skip: int = 0,
         limit: int = 100,
     ) -> list[FuelPumpDelivery]:
@@ -82,6 +84,7 @@ class FuelPumpDeliveryService(
             .where(
                 FuelPumpDelivery.pump_id == pump_id,
                 FuelPumpDelivery.deleted_at.is_(None),
+                FuelPumpDelivery.organization_id == organization_id
             )
             .order_by(FuelPumpDelivery.delivery_date.desc())
             .offset(skip)

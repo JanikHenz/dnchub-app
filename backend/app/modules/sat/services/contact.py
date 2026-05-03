@@ -18,12 +18,15 @@ class SatContactService(BaseService[SatContact, SatContactCreate, SatContactUpda
         self,
         db: Session,
         customer_id: str,
+        *,
+        organization_id: str,
     ) -> list[SatContact]:
         """Get all contacts for a customer, excluding deleted."""
         result = db.execute(
             select(SatContact).where(
                 SatContact.customer_id == customer_id,
                 SatContact.deleted_at.is_(None),
+                SatContact.organization_id == organization_id
             )
         )
         return list(result.scalars().all())

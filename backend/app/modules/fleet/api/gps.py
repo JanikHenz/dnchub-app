@@ -43,11 +43,11 @@ def list_trips(
     """List trips with optional filters."""
     if vehicle_id:
         trips = trip_service.get_trips_by_vehicle(
-            db, vehicle_id, skip=skip, limit=limit
+            db, vehicle_id, organization_id=current_user.organization_id, skip=skip, limit=limit
         )
     elif employee_id:
         trips = trip_service.get_trips_by_employee(
-            db, employee_id, skip=skip, limit=limit
+            db, employee_id, organization_id=current_user.organization_id, skip=skip, limit=limit
         )
     else:
         trips = trip_service.get_multi(
@@ -89,7 +89,7 @@ def end_trip(
     end_odometer: Decimal | None = None,
 ) -> TripResponse:
     """End an active trip."""
-    trip = trip_service.get_or_404(db, trip_id)
+    trip = trip_service.get_or_404(db, trip_id, organization_id=current_user.organization_id)
     updated = trip_service.end_trip(
         db,
         trip=trip,
@@ -106,7 +106,7 @@ def get_active_trip(
     current_user: CurrentUserDep,
 ) -> TripResponse | None:
     """Get active trip for a vehicle."""
-    trip = trip_service.get_active_trip_for_vehicle(db, vehicle_id)
+    trip = trip_service.get_active_trip_for_vehicle(db, vehicle_id, organization_id=current_user.organization_id)
     return TripResponse.model_validate(trip) if trip else None
 
 
@@ -133,7 +133,7 @@ def get_trip(
     current_user: CurrentUserDep,
 ) -> TripResponse:
     """Get a trip by ID."""
-    trip = trip_service.get_or_404(db, trip_id)
+    trip = trip_service.get_or_404(db, trip_id, organization_id=current_user.organization_id)
     return TripResponse.model_validate(trip)
 
 
@@ -144,6 +144,7 @@ def get_trip_route(
     current_user: CurrentUserDep,
 ) -> list[TripPositionResponse]:
     """Get trip route (GPS positions)."""
+    trip_service.get_or_404(db, trip_id, organization_id=current_user.organization_id)
     positions = trip_position_service.get_trip_route(db, trip_id)
     return [TripPositionResponse.model_validate(p) for p in positions]
 
@@ -159,6 +160,7 @@ def add_trip_position(
     heading: int | None = None,
 ) -> TripPositionResponse:
     """Add GPS position to a trip."""
+    trip_service.get_or_404(db, trip_id, organization_id=current_user.organization_id)
     position = trip_position_service.add_position(
         db,
         trip_id=trip_id,
@@ -178,7 +180,7 @@ def get_vehicle_latest_position(
 ) -> TripPositionResponse | None:
     """Get latest GPS position for a vehicle."""
     position = trip_position_service.get_latest_position_for_vehicle(
-        db, vehicle_id
+        db, vehicle_id, organization_id=current_user.organization_id
     )
     return TripPositionResponse.model_validate(position) if position else None
 
@@ -226,7 +228,7 @@ def get_geofence(
     current_user: CurrentUserDep,
 ) -> GeofenceResponse:
     """Get a geofence by ID."""
-    geofence = geofence_service.get_or_404(db, geofence_id)
+    geofence = geofence_service.get_or_404(db, geofence_id, organization_id=current_user.organization_id)
     return GeofenceResponse.model_validate(geofence)
 
 
@@ -238,7 +240,7 @@ def update_geofence(
     current_user: FleetManagerDep,
 ) -> GeofenceResponse:
     """Update a geofence."""
-    geofence = geofence_service.get_or_404(db, geofence_id)
+    geofence = geofence_service.get_or_404(db, geofence_id, organization_id=current_user.organization_id)
     updated = geofence_service.update(db, db_obj=geofence, obj_in=geofence_in)
     return GeofenceResponse.model_validate(updated)
 
@@ -250,7 +252,7 @@ def delete_geofence(
     current_user: FleetManagerDep,
 ) -> None:
     """Delete a geofence."""
-    geofence_service.delete(db, geofence_id)
+    geofence_service.delete(db, geofence_id, organization_id=current_user.organization_id)
 
 
 @router.post("/geofences/{geofence_id}/check")
@@ -262,7 +264,7 @@ def check_position_in_geofence(
     current_user: CurrentUserDep,
 ) -> dict:
     """Check if a position is inside a geofence."""
-    geofence = geofence_service.get_or_404(db, geofence_id)
+    geofence = geofence_service.get_or_404(db, geofence_id, organization_id=current_user.organization_id)
     is_inside = geofence_service.check_position_in_geofence(
         geofence, latitude, longitude
     )
@@ -335,7 +337,7 @@ def get_gps_alert(
     current_user: CurrentUserDep,
 ) -> GpsAlertResponse:
     """Get a GPS alert by ID."""
-    alert = gps_alert_service.get_or_404(db, alert_id)
+    alert = gps_alert_service.get_or_404(db, alert_id, organization_id=current_user.organization_id)
     return GpsAlertResponse.model_validate(alert)
 
 
@@ -346,7 +348,7 @@ def acknowledge_gps_alert(
     current_user: CurrentUserDep,
 ) -> GpsAlertResponse:
     """Acknowledge a GPS alert."""
-    alert = gps_alert_service.get_or_404(db, alert_id)
+    alert = gps_alert_service.get_or_404(db, alert_id, organization_id=current_user.organization_id)
     updated = gps_alert_service.acknowledge_alert(
         db, alert, acknowledged_by=current_user.id
     )

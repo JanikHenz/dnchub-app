@@ -51,7 +51,7 @@ def get_tool_category(
     current_user: CurrentUserDep,
 ) -> ToolCategoryResponse:
     """Get a tool category by ID."""
-    category = tool_category_service.get_or_404(db, category_id)
+    category = tool_category_service.get_or_404(db, category_id, organization_id=current_user.organization_id)
     return ToolCategoryResponse.model_validate(category)
 
 
@@ -63,7 +63,7 @@ def update_tool_category(
     current_user: FleetManagerDep,
 ) -> ToolCategoryResponse:
     """Update a tool category."""
-    category = tool_category_service.get_or_404(db, category_id)
+    category = tool_category_service.get_or_404(db, category_id, organization_id=current_user.organization_id)
     updated = tool_category_service.update(db, db_obj=category, obj_in=category_in)
     return ToolCategoryResponse.model_validate(updated)
 
@@ -75,4 +75,4 @@ def delete_tool_category(
     current_user: FleetManagerDep,
 ) -> None:
     """Delete a tool category (soft delete)."""
-    tool_category_service.delete(db, category_id)
+    tool_category_service.delete(db, category_id, organization_id=current_user.organization_id)

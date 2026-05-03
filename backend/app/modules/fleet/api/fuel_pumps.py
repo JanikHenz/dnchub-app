@@ -97,7 +97,7 @@ def get_fuel_pump(
     current_user: CurrentUserDep,
 ) -> FuelPumpResponse:
     """Get a fuel pump by ID."""
-    pump = fuel_pump_service.get_or_404(db, pump_id)
+    pump = fuel_pump_service.get_or_404(db, pump_id, organization_id=current_user.organization_id)
     return FuelPumpResponse.model_validate(pump)
 
 
@@ -109,7 +109,7 @@ def update_fuel_pump(
     current_user: CurrentUserDep,
 ) -> FuelPumpResponse:
     """Update a fuel pump."""
-    pump = fuel_pump_service.get_or_404(db, pump_id)
+    pump = fuel_pump_service.get_or_404(db, pump_id, organization_id=current_user.organization_id)
     updated = fuel_pump_service.update(db, db_obj=pump, obj_in=pump_in)
     return FuelPumpResponse.model_validate(updated)
 
@@ -121,7 +121,7 @@ def delete_fuel_pump(
     current_user: CurrentUserDep,
 ) -> None:
     """Delete a fuel pump (soft delete)."""
-    fuel_pump_service.delete(db, pump_id)
+    fuel_pump_service.delete(db, pump_id, organization_id=current_user.organization_id)
 
 
 @router.post("/{pump_id}/adjust-level", response_model=FuelPumpResponse)
@@ -136,5 +136,6 @@ def adjust_pump_level(
         db,
         pump_id=pump_id,
         adjustment=adjustment.adjustment,
+        organization_id=current_user.organization_id,
     )
     return FuelPumpResponse.model_validate(pump)

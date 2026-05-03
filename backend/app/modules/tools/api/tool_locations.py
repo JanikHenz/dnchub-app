@@ -51,7 +51,7 @@ def get_tool_location(
     current_user: CurrentUserDep,
 ) -> ToolLocationResponse:
     """Get a tool location by ID."""
-    location = tool_location_service.get_or_404(db, location_id)
+    location = tool_location_service.get_or_404(db, location_id, organization_id=current_user.organization_id)
     return ToolLocationResponse.model_validate(location)
 
 
@@ -63,7 +63,7 @@ def update_tool_location(
     current_user: FleetManagerDep,
 ) -> ToolLocationResponse:
     """Update a tool location."""
-    location = tool_location_service.get_or_404(db, location_id)
+    location = tool_location_service.get_or_404(db, location_id, organization_id=current_user.organization_id)
     updated = tool_location_service.update(db, db_obj=location, obj_in=location_in)
     return ToolLocationResponse.model_validate(updated)
 
@@ -75,4 +75,4 @@ def delete_tool_location(
     current_user: FleetManagerDep,
 ) -> None:
     """Delete a tool location (soft delete)."""
-    tool_location_service.delete(db, location_id)
+    tool_location_service.delete(db, location_id, organization_id=current_user.organization_id)

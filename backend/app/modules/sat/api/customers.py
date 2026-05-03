@@ -55,7 +55,7 @@ def get_customer(
     current_user: CurrentUserDep,
 ) -> SatCustomerResponse:
     """Get a SAT customer by ID."""
-    customer = sat_customer_service.get_or_404(db, customer_id)
+    customer = sat_customer_service.get_or_404(db, customer_id, organization_id=current_user.organization_id)
     return SatCustomerResponse.model_validate(customer)
 
 
@@ -67,7 +67,7 @@ def update_customer(
     current_user: SatManagerDep,
 ) -> SatCustomerResponse:
     """Update a SAT customer."""
-    customer = sat_customer_service.get_or_404(db, customer_id)
+    customer = sat_customer_service.get_or_404(db, customer_id, organization_id=current_user.organization_id)
     updated = sat_customer_service.update(db, db_obj=customer, obj_in=customer_in)
     return SatCustomerResponse.model_validate(updated)
 
@@ -79,4 +79,4 @@ def delete_customer(
     current_user: SatManagerDep,
 ) -> None:
     """Delete a SAT customer."""
-    sat_customer_service.delete(db, customer_id)
+    sat_customer_service.delete(db, customer_id, organization_id=current_user.organization_id)

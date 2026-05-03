@@ -27,7 +27,7 @@ class FuelService(BaseService[FuelEntry, FuelEntryCreate, FuelEntryUpdate]):
         # Get vehicle to update odometer
         from app.modules.fleet.services.vehicle import vehicle_service
 
-        vehicle = vehicle_service.get_or_404(db, obj_in.vehicle_id)
+        vehicle = vehicle_service.get_or_404(db, obj_in.vehicle_id, organization_id=obj_in.organization_id)
 
         # Calculate total cost
         total_cost = obj_in.volume * obj_in.price_per_unit
@@ -92,6 +92,7 @@ class FuelService(BaseService[FuelEntry, FuelEntryCreate, FuelEntryUpdate]):
         db: Session,
         vehicle_id: str,
         *,
+        organization_id: str | None = None,
         skip: int = 0,
         limit: int = 100,
     ) -> list[FuelEntry]:
@@ -101,6 +102,7 @@ class FuelService(BaseService[FuelEntry, FuelEntryCreate, FuelEntryUpdate]):
             .where(
                 FuelEntry.vehicle_id == vehicle_id,
                 FuelEntry.deleted_at.is_(None),
+                FuelEntry.organization_id == organization_id
             )
             .order_by(FuelEntry.date.desc())
             .offset(skip)
@@ -172,6 +174,7 @@ class FuelService(BaseService[FuelEntry, FuelEntryCreate, FuelEntryUpdate]):
         db: Session,
         employee_id: str,
         *,
+        organization_id: str | None = None,
         skip: int = 0,
         limit: int = 100,
     ) -> list[FuelEntry]:
@@ -181,6 +184,7 @@ class FuelService(BaseService[FuelEntry, FuelEntryCreate, FuelEntryUpdate]):
             .where(
                 FuelEntry.employee_id == employee_id,
                 FuelEntry.deleted_at.is_(None),
+                FuelEntry.organization_id == organization_id
             )
             .order_by(FuelEntry.date.desc())
             .offset(skip)
@@ -193,9 +197,11 @@ class FuelService(BaseService[FuelEntry, FuelEntryCreate, FuelEntryUpdate]):
         db: Session,
         id: str,
         soft_delete: bool = True,
+        *,
+        organization_id: str | None = None,
     ) -> FuelEntry | None:
         """Delete a fuel entry and update vehicle total fuel cost."""
-        entry = self.get(db, id)
+        entry = self.get(db, id, organization_id=organization_id)
         if entry is None:
             return None
 

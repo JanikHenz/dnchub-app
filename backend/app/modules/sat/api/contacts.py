@@ -20,7 +20,7 @@ def list_contacts(
     current_user: CurrentUserDep,
 ) -> list[SatContactResponse]:
     """List contacts for a SAT customer."""
-    contacts = sat_contact_service.get_by_customer(db, customer_id=customer_id)
+    contacts = sat_contact_service.get_by_customer(db, customer_id=customer_id, organization_id=current_user.organization_id)
     return [SatContactResponse.model_validate(c) for c in contacts]
 
 
@@ -54,7 +54,7 @@ def update_contact(
     current_user: SatManagerDep,
 ) -> SatContactResponse:
     """Update a SAT contact."""
-    contact = sat_contact_service.get_or_404(db, contact_id)
+    contact = sat_contact_service.get_or_404(db, contact_id, organization_id=current_user.organization_id)
     updated = sat_contact_service.update(db, db_obj=contact, obj_in=contact_in)
     return SatContactResponse.model_validate(updated)
 
@@ -66,4 +66,4 @@ def delete_contact(
     current_user: SatManagerDep,
 ) -> None:
     """Delete a SAT contact."""
-    sat_contact_service.delete(db, contact_id)
+    sat_contact_service.delete(db, contact_id, organization_id=current_user.organization_id)

@@ -61,7 +61,7 @@ def get_assistance(
     current_user: CurrentUserDep,
 ) -> SatAssistanceResponse:
     """Get a SAT assistance by ID with eagerly loaded relationships."""
-    assistance = sat_assistance_service.get_detail(db, assistance_id)
+    assistance = sat_assistance_service.get_detail(db, assistance_id, organization_id=current_user.organization_id)
     if assistance is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -78,7 +78,7 @@ def update_assistance(
     current_user: SatManagerDep,
 ) -> SatAssistanceResponse:
     """Update a SAT assistance."""
-    assistance = sat_assistance_service.get_or_404(db, assistance_id)
+    assistance = sat_assistance_service.get_or_404(db, assistance_id, organization_id=current_user.organization_id)
     updated = sat_assistance_service.update(db, db_obj=assistance, obj_in=assistance_in)
     return SatAssistanceResponse.model_validate(updated)
 
@@ -90,7 +90,7 @@ def delete_assistance(
     current_user: SatManagerDep,
 ) -> None:
     """Delete a SAT assistance."""
-    sat_assistance_service.delete(db, assistance_id)
+    sat_assistance_service.delete(db, assistance_id, organization_id=current_user.organization_id)
 
 
 @router.patch("/{assistance_id}/status", response_model=SatAssistanceResponse)
@@ -101,6 +101,6 @@ def update_assistance_status(
     current_user: SatManagerDep,
 ) -> SatAssistanceResponse:
     """Update the status of a SAT assistance."""
-    assistance = sat_assistance_service.get_or_404(db, assistance_id)
+    assistance = sat_assistance_service.get_or_404(db, assistance_id, organization_id=current_user.organization_id)
     updated = sat_assistance_service.update(db, db_obj=assistance, obj_in=status_in)
     return SatAssistanceResponse.model_validate(updated)

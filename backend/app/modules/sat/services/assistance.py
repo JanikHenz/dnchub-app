@@ -19,6 +19,8 @@ class SatAssistanceService(BaseService[SatAssistance, SatAssistanceCreate, SatAs
         self,
         db: Session,
         assistance_id: str,
+        *,
+        organization_id: str | None = None,
     ) -> SatAssistance | None:
         """Get an assistance with all relationships eagerly loaded."""
         result = db.execute(
@@ -26,6 +28,7 @@ class SatAssistanceService(BaseService[SatAssistance, SatAssistanceCreate, SatAs
             .where(
                 SatAssistance.id == assistance_id,
                 SatAssistance.deleted_at.is_(None),
+                SatAssistance.organization_id == organization_id
             )
             .options(
                 selectinload(SatAssistance.report),

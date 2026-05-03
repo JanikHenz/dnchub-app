@@ -56,7 +56,7 @@ def get_machine(
     current_user: CurrentUserDep,
 ) -> SatMachineResponse:
     """Get a SAT machine by ID."""
-    machine = sat_machine_service.get_or_404(db, machine_id)
+    machine = sat_machine_service.get_or_404(db, machine_id, organization_id=current_user.organization_id)
     return SatMachineResponse.model_validate(machine)
 
 
@@ -68,7 +68,7 @@ def update_machine(
     current_user: SatManagerDep,
 ) -> SatMachineResponse:
     """Update a SAT machine."""
-    machine = sat_machine_service.get_or_404(db, machine_id)
+    machine = sat_machine_service.get_or_404(db, machine_id, organization_id=current_user.organization_id)
     updated = sat_machine_service.update(db, db_obj=machine, obj_in=machine_in)
     return SatMachineResponse.model_validate(updated)
 
@@ -80,4 +80,4 @@ def delete_machine(
     current_user: SatManagerDep,
 ) -> None:
     """Delete a SAT machine."""
-    sat_machine_service.delete(db, machine_id)
+    sat_machine_service.delete(db, machine_id, organization_id=current_user.organization_id)

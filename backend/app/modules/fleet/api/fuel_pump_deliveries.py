@@ -30,6 +30,7 @@ def list_fuel_pump_deliveries(
         deliveries = fuel_pump_delivery_service.get_by_pump(
             db,
             pump_id=pump_id,
+            organization_id=current_user.organization_id,
             skip=skip,
             limit=limit,
         )
@@ -94,6 +95,7 @@ def list_deliveries_by_pump(
     deliveries = fuel_pump_delivery_service.get_by_pump(
         db,
         pump_id=pump_id,
+        organization_id=current_user.organization_id,
         skip=skip,
         limit=limit,
     )
@@ -107,7 +109,7 @@ def get_fuel_pump_delivery(
     current_user: CurrentUserDep,
 ) -> FuelPumpDeliveryResponse:
     """Get a fuel pump delivery by ID."""
-    delivery = fuel_pump_delivery_service.get_or_404(db, delivery_id)
+    delivery = fuel_pump_delivery_service.get_or_404(db, delivery_id, organization_id=current_user.organization_id)
     return FuelPumpDeliveryResponse.model_validate(delivery)
 
 
@@ -119,7 +121,7 @@ def update_fuel_pump_delivery(
     current_user: CurrentUserDep,
 ) -> FuelPumpDeliveryResponse:
     """Update a fuel pump delivery."""
-    delivery = fuel_pump_delivery_service.get_or_404(db, delivery_id)
+    delivery = fuel_pump_delivery_service.get_or_404(db, delivery_id, organization_id=current_user.organization_id)
     updated = fuel_pump_delivery_service.update(db, db_obj=delivery, obj_in=delivery_in)
     return FuelPumpDeliveryResponse.model_validate(updated)
 
@@ -131,4 +133,4 @@ def delete_fuel_pump_delivery(
     current_user: CurrentUserDep,
 ) -> None:
     """Delete a fuel pump delivery (soft delete)."""
-    fuel_pump_delivery_service.delete(db, delivery_id)
+    fuel_pump_delivery_service.delete(db, delivery_id, organization_id=current_user.organization_id)

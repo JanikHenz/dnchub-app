@@ -21,14 +21,38 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """Initialize service with model class."""
         self.model = model
 
-    def get(self, db: Session, id: str) -> ModelType | None:
+    def get(
+        self,
+        db: Session,
+        id: str,
+        *,
+        organization_id: str | None = None,
+        include_deleted: bool = False,
+    ) -> ModelType | None:
         """Get a single record by ID."""
-        result = db.execute(select(self.model).where(self.model.id == id))
+        query = select(self.model).where(self.model.id == id)
+
+        # Filter by organization if model has organization_id
+        if organization_id and hasattr(self.model, "organization_id"):
+            query = query.where(self.model.organization_id == organization_id)
+
+        # Filter out soft-deleted records
+        if not include_deleted and hasattr(self.model, "deleted_at"):
+            query = query.where(self.model.deleted_at.is_(None))
+
+        result = db.execute(query)
         return result.scalar_one_or_none()
 
-    def get_or_404(self, db: Session, id: str) -> ModelType:
+    def get_or_404(
+        self,
+        db: Session,
+        id: str,
+        *,
+        organization_id: str | None = None,
+        include_deleted: bool = False,
+    ) -> ModelType:
         """Get a single record by ID or raise NotFoundError."""
-        obj = self.get(db, id)
+        obj = self.get(db, id, organization_id=organization_id, include_deleted=include_deleted)
         if obj is None:
             raise NotFoundError(self.model.__name__, id)
         return obj
@@ -122,9 +146,11 @@ class BaseService(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         db: Session,
         id: str,
         soft_delete: bool = True,
+        *,
+        organization_id: str | None = None,
     ) -> ModelType | None:
         """Delete a record (soft or hard delete)."""
-        obj = self.get(db, id)
+        obj = self.get(db, id, organization_id=organization_id)
         if obj is None:
             return None
 

@@ -54,7 +54,7 @@ def get_report(
     current_user: CurrentUserDep,
 ) -> SatInterventionReportResponse:
     """Get a SAT intervention report by ID."""
-    report = sat_intervention_report_service.get_or_404(db, report_id)
+    report = sat_intervention_report_service.get_or_404(db, report_id, organization_id=current_user.organization_id)
     return SatInterventionReportResponse.model_validate(report)
 
 
@@ -66,7 +66,7 @@ def update_report(
     current_user: SatManagerDep,
 ) -> SatInterventionReportResponse:
     """Update a SAT intervention report."""
-    report = sat_intervention_report_service.get_or_404(db, report_id)
+    report = sat_intervention_report_service.get_or_404(db, report_id, organization_id=current_user.organization_id)
     updated = sat_intervention_report_service.update(db, db_obj=report, obj_in=report_in)
     return SatInterventionReportResponse.model_validate(updated)
 
@@ -78,4 +78,4 @@ def delete_report(
     current_user: SatManagerDep,
 ) -> None:
     """Delete a SAT intervention report."""
-    sat_intervention_report_service.delete(db, report_id)
+    sat_intervention_report_service.delete(db, report_id, organization_id=current_user.organization_id)

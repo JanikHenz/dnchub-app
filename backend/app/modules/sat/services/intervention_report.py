@@ -24,12 +24,15 @@ class SatInterventionReportService(
         self,
         db: Session,
         assistance_id: str,
+        *,
+        organization_id: str,
     ) -> SatInterventionReport | None:
         """Get the intervention report for a specific assistance."""
         result = db.execute(
             select(SatInterventionReport).where(
                 SatInterventionReport.assistance_id == assistance_id,
                 SatInterventionReport.deleted_at.is_(None),
+                SatInterventionReport.organization_id == organization_id
             )
         )
         return result.scalar_one_or_none()
